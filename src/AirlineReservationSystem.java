@@ -130,7 +130,11 @@ public class AirlineReservationSystem {
                         flight.getString("destination"),
                         flight.getString("departureDate"),
                         flight.getInteger("availableSeats"),
-                        flight.getDouble("price")
+                        flight.containsKey("price")
+                                ? (flight.get("price") instanceof Integer
+                                ? ((Integer) flight.get("price")).doubleValue()
+                                : flight.getDouble("price"))
+                                : 0.0
                 });
             }
         } catch (Exception ex) {
@@ -258,20 +262,26 @@ public class AirlineReservationSystem {
         formPanel.add(passportField);
 
         JButton searchButton = new JButton("Search Bookings");
-        JButton backButton = new JButton("Back to Menu");
         JButton showBoardingPassButton = new JButton("Show Boarding Pass");
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(searchButton);
         buttonPanel.add(showBoardingPassButton);
-        buttonPanel.add(backButton);
-        formPanel.add(buttonPanel);
 
+        formPanel.add(buttonPanel); // Add button panel to form panel
+
+        // Table for displaying bookings
         String[] columns = {"Booking ID", "Flight Number", "Booking Date"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         JTable bookingsTable = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(bookingsTable);
 
+        // Back button panel
+        JButton backButton = new JButton("Back to Menu");
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        backPanel.add(backButton);
+
+        // Set up button actions
         searchButton.addActionListener(e -> {
             String passportNumber = passportField.getText().trim();
             if (passportNumber.isEmpty()) {
@@ -292,13 +302,16 @@ public class AirlineReservationSystem {
             showBoardingPassDialog(bookingId);
         });
 
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menu"));
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menu")); // Action for Back button
 
+        // Add components to the view panel
         viewBookingsPanel.add(formPanel, BorderLayout.NORTH);
         viewBookingsPanel.add(scrollPane, BorderLayout.CENTER);
+        viewBookingsPanel.add(backPanel, BorderLayout.SOUTH); // Add back button at the bottom
 
         mainPanel.add(viewBookingsPanel, "viewBookings");
     }
+
 
     private void showBoardingPassDialog(String bookingId) {
         try {
